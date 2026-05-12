@@ -201,41 +201,131 @@ CSV 含 UTF-8 BOM，Excel 直接打开不乱码；pandas/SPSS 也可直接读取
 
 ## 部署
 
-部署后台默认使用环境变量覆盖 `application.yml` 中的占位项，本地开发不设环境变量则继续走 `localhost:3306 / root / 123456 / CORS *` 的默认值。
+**线上架构**：
+- 前端：Cloudflare Pages → `https://verbal.pmsjl.com`
+- 后端：阿里云 ECS (Ubuntu 24.04) + Nginx → `https://api.pmsjl.com`
+- DNS：Cloudflare 管理 `pmsjl.com` 的全部记录
 
-### 后端：云服务器 (Linux)
+### 前置：推送代码到 GitHub
 
-前置：服务器装好 Java 17、MySQL 8，已用 `backend/sql/init.sql` 建好库表。
+Cloudflare Pages 需要从 GitHub 拉代码，所以先把仓库 push 上去（如果还没推）。
 
-1. 在开发机打包：
-   ```bash
-   cd backend
-   mvn package -DskipTests
-   # → backend/target/verbal-test-backend-0.1.0.jar
-   ```
-2. 上传 jar 到服务器（scp 或 CI 流水线均可）。
-3. 用环境变量启动（建议放在 systemd Unit 的 `Environment=` 里）：
-   ```bash
-   DB_HOST=localhost \
-   DB_PORT=3306 \
-   DB_NAME=verbal_test \
-   DB_USERNAME=verbal \
-   DB_PASSWORD=<生产密码> \
-   ALLOWED_ORIGINS=https://verbal.example.com \
-   java -jar verbal-test-backend-0.1.0.jar
-   ```
-4. 推荐前面挂 Nginx 反代 + Let's Encrypt HTTPS，证书指向 `api.verbal.example.com`，反代到 `http://127.0.0.1:8080`。
+### 1. 前端：Cloudflare Pages
 
-### 前端：Cloudflare Pages
+1. Cloudflare Dashboard → Workers & Pages → Pages → Connect to Git，选 GitHub 仓库。
+2. 构建配置：
+   - **Build command**: `cd frontend && npm install && npm run build`
+   - **Build output directory**: `frontend/dist`
+   - **Root directory**: `/`
+3. 环境变量：`VITE_API_BASE` = `https://api.pmsjl.com`
+4. 保存后自动构建。Custom domains → 绑定 `verbal.pmsjl.com`（Cloudflare 会自动加 DNS 记录）。
+5. 之后每次 push main 分支自动重新部署。
 
-1. 把仓库 push 到 GitHub。
-2. Cloudflare Dashboard → Pages → Connect to Git，选这个仓库。
-3. 构建配置：
-   - **Root directory**: `frontend`
-   - **Build command**: `pnpm install && pnpm build`（或 `npm install && npm run build`）
-   - **Build output directory**: `dist`
-4. 环境变量：`VITE_API_BASE=https://api.verbal.example.com`（覆盖 `.env.production`）。
-5. Custom domains 接你购买的域名（例 `verbal.example.com`）。
+### 2. 后端：阿里云 ECS Ubuntu 24.04
+
+```bash
+# SSH 登录
+ssh root@<ECS 公网 IP>
+
+# --- 基础环境 ---
+apt update && apt upgrade -y
+apt install -y openjdk-17-jdk-headless mysql-server nginx certbot python3-certbot-nginx
+
+# --- MySQL ---
+systemctl enable mysql && systemctl start mysql
+mysql_secure_installation  # 按提示走（disable VALIDATE PASSWORD 组件，remove anonymous user，disallow root remote login）
+
+# 上传 init.sql 到服务器，然后：
+mysql -u root -p < backend/sql/init.sql
+
+# 创建应用专用用户
+mysql -u root -p -e "
+  CREATE USER 'verbal'@'localhost' IDENTIFIED BY '<生产密码>';
+  GRANT ALL ON verbal_test.* TO 'verbal'@'localhost';
+  FLUSH PRIVILEGES;
+"
+
+# --- 部署 JAR ---
+# 本机打包：cd backend && mvn package -DskipTests
+# 上传：scp target/verbal-test-backend-0.1.0.jar root@<ECS_IP>:/opt/verbal-test/
+
+# 创建 systemd 服务
+cat > /etc/systemd/system/verbal-test.service <<'UNIT'
+[Unit]
+Description=Verbal Test Backend
+After=network.target mysql.service
+
+[Service]
+User=root
+WorkingDirectory=/opt/verbal-test
+Environment="DB_PASSWORD=<生产密码>"
+Environment="ALLOWED_ORIGINS=https://verbal.pmsjl.com"
+ExecStart=/usr/bin/java -jar /opt/verbal-test/verbal-test-backend-0.1.0.jar
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable verbal-test --now
+systemctl status verbal-test  # 确认 active (running)
+
+# --- Nginx 反代 + HTTPS ---
+# 先确保 DNS：api.pmsjl.com → A 记录 → ECS IP（Cloudflare DNS 面板，关闭 Proxy/灰云）
+
+cat > /etc/nginx/sites-available/verbal-api <<'NGX'
+server {
+    listen 80;
+    server_name api.pmsjl.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+}
+NGX
+
+ln -s /etc/nginx/sites-available/verbal-api /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+
+# 申请 SSL
+certbot --nginx -d api.pmsjl.com
+# 选 (2) Redirect，之后 Nginx 自动把 HTTP 跳转到 HTTPS
+```
+
+### 3. DNS 记录（Cloudflare 面板）
+
+| 类型 | 名称 | 值 | Proxy |
+|---|---|---|---|
+| A | `api` | `<ECS IP>` | 关闭（灰云） |
+| CNAME | `verbal` | `<project>.pages.dev` | 开启（橙云） |
+
+> `api` 关 Proxy 是因为 Let's Encrypt HTTP 验证需要直连服务器 IP。前端 `verbal` 开 Proxy 享受 Cloudflare CDN。
+
+### 4. 验证
+
+```bash
+curl https://api.pmsjl.com/api/records          # 预期 []
+curl -O -J https://api.pmsjl.com/api/records/export  # 预期下载 CSV
+```
+
+浏览器开 `https://verbal.pmsjl.com` 走完整被试流程，再到 `https://verbal.pmsjl.com/?admin=1` 确认记录可见。
+
+### 5. 日常运维
+
+- **更新后端**：本地 `mvn package -DskipTests` → `scp target/verbal-test-backend-0.1.0.jar root@<ECS_IP>:/opt/verbal-test/` → `ssh root@<ECS_IP> systemctl restart verbal-test`
+- **查看日志**：`ssh root@<ECS_IP> journalctl -u verbal-test -f`
+- **数据库备份**（建议加 cron）：
+  ```bash
+  echo '0 3 * * * mysqldump -u verbal -p"<密码>" verbal_test | gzip > /opt/backups/verbal_$(date +\%Y\%m\%d).sql.gz' | crontab -
+  ```
 
 ### 关于管理页安全
 
