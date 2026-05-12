@@ -1,0 +1,46 @@
+# Java / Maven
+backend/target/
+backend/.mvn/
+*.class
+*.jar
+*.war
+
+# 前端 (Vite + React + TS)
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/*.tsbuildinfo
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+logs/
+
+# 实验音频（体积大，不进仓库；实验员本地放置到 frontend/src/assets/audio/）
+frontend/src/assets/audio/*.mp3
+frontend/src/assets/audio/*.wav
+frontend/src/assets/audio/*.m4a
+frontend/src/assets/audio/*.aac
+frontend/src/assets/audio/*.ogg
+frontend/src/assets/audio/*.opus
+frontend/src/assets/audio/*.flac
+!frontend/src/assets/audio/README.md
+
+# 环境变量 / 密钥
+.env
+.env.production
+.env.development
+*.env.local
+
+# Claude Code 本地配置（每个人自己的 settings，不进仓库）
+.claude/
+
+# OS
+$RECYCLE.BIN/
