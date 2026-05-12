@@ -203,7 +203,7 @@ CSV 含 UTF-8 BOM，Excel 直接打开不乱码；pandas/SPSS 也可直接读取
 
 **线上架构**：
 - 前端：Cloudflare Pages → `https://verbal.pmsjl.com`
-- 后端：阿里云 ECS (Ubuntu 24.04) + Nginx → `https://api.pmsjl.com`
+- 后端：阿里云 ECS (Ubuntu 24.04) + Nginx → `https://verbalapi.pmsjl.com`
 - DNS：Cloudflare 管理 `pmsjl.com` 的全部记录
 
 ### 前置：推送代码到 GitHub
@@ -217,7 +217,7 @@ Cloudflare Pages 需要从 GitHub 拉代码，所以先把仓库 push 上去（�
    - **Build command**: `cd frontend && npm install && npm run build`
    - **Build output directory**: `frontend/dist`
    - **Root directory**: `/`
-3. 环境变量：`VITE_API_BASE` = `https://api.pmsjl.com`
+3. 环境变量：`VITE_API_BASE` = `https://verbalverbalapi.pmsjl.com`
 4. 保存后自动构建。Custom domains → 绑定 `verbal.pmsjl.com`（Cloudflare 会自动加 DNS 记录）。
 5. 之后每次 push main 分支自动重新部署。
 
@@ -273,12 +273,12 @@ systemctl enable verbal-test --now
 systemctl status verbal-test  # 确认 active (running)
 
 # --- Nginx 反代 + HTTPS ---
-# 先确保 DNS：api.pmsjl.com → A 记录 → ECS IP（Cloudflare DNS 面板，关闭 Proxy/灰云）
+# 先确保 DNS：verbalapi.pmsjl.com → A 记录 → ECS IP（Cloudflare DNS 面板，关闭 Proxy/灰云）
 
 cat > /etc/nginx/sites-available/verbal-api <<'NGX'
 server {
     listen 80;
-    server_name api.pmsjl.com;
+    server_name verbalapi.pmsjl.com;
 
     location / {
         proxy_pass http://127.0.0.1:8080;
@@ -296,7 +296,7 @@ rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 
 # 申请 SSL
-certbot --nginx -d api.pmsjl.com
+certbot --nginx -d verbalapi.pmsjl.com
 # 选 (2) Redirect，之后 Nginx 自动把 HTTP 跳转到 HTTPS
 ```
 
@@ -312,8 +312,8 @@ certbot --nginx -d api.pmsjl.com
 ### 4. 验证
 
 ```bash
-curl https://api.pmsjl.com/api/records          # 预期 []
-curl -O -J https://api.pmsjl.com/api/records/export  # 预期下载 CSV
+curl https://verbalapi.pmsjl.com/api/records          # 预期 []
+curl -O -J https://verbalapi.pmsjl.com/api/records/export  # 预期下载 CSV
 ```
 
 浏览器开 `https://verbal.pmsjl.com` 走完整被试流程，再到 `https://verbal.pmsjl.com/?admin=1` 确认记录可见。
