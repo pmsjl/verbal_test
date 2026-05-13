@@ -147,7 +147,7 @@ export default function TestScreen({ condition, onGameOver }: Props) {
         </button>
       </div>
 
-      {AUDIO_SRC && <audio ref={audioRef} src={AUDIO_SRC} preload="auto" />}
+      {AUDIO_SRC && <audio ref={audioRef} src={AUDIO_SRC} preload="auto" loop />}
     </section>
   );
 }
