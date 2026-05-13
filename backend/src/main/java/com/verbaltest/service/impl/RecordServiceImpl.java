@@ -108,6 +108,17 @@ public class RecordServiceImpl implements RecordService {
         return out;
     }
 
+    @Override
+    public void delete(Long id) {
+        recordMapper.deleteById(id);
+    }
+
+    @Override
+    public int batchDelete(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) return 0;
+        return recordMapper.deleteBatchIds(ids);
+    }
+
     private static String csv(Object v) {
         if (v == null) return "";
         String s = v.toString();

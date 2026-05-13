@@ -14,4 +14,10 @@ public interface RecordService {
 
     /** 导出全部记录关联被试信息为 CSV 字符串。 */
     String exportCsv();
+
+    /** 删除一条测试记录。 */
+    void delete(Long id);
+
+    /** 批量删除测试记录。 */
+    int batchDelete(List<Long> ids);
 }

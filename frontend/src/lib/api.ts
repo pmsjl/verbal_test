@@ -73,3 +73,18 @@ export function listRecords() {
 export function exportCsvUrl() {
   return API_BASE + "/api/records/export";
 }
+
+export async function deleteRecord(id: number) {
+  const res = await fetch(`${API_BASE}/api/records/${id}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(`delete ${id} failed: HTTP ${res.status}`);
+}
+
+export async function batchDeleteRecords(ids: number[]) {
+  const res = await fetch(`${API_BASE}/api/records/batch-delete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(ids),
+  });
+  if (!res.ok) throw new Error(`batch delete failed: HTTP ${res.status}`);
+  return (await res.json()) as number;
+}
