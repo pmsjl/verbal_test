@@ -1,18 +1,27 @@
 package com.verbaltest.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+
+import java.util.List;
 
 /**
- * CORS 配置。允许来源通过 app.cors.allowed-origins（环境变量 ALLOWED_ORIGINS）配置：
+ * CORS 配置 —— 使用 Servlet Filter 而非 WebMvcConfigurer.addCorsMappings，
+ * 并且提升到最高优先级，确保错误响应（400/404/500 等）也能带上 CORS 头。
+ *
+ * 允许来源通过 app.cors.allowed-origins（环境变量 ALLOWED_ORIGINS）配置：
  * - 本地开发默认 "*"
  * - 线上设置成具体的前端域名，例 https://verbal.example.com
- * 不使用 cookie，故 allowCredentials = false，配合限定 origin 时也无副作用。
  */
 @Configuration
-public class CorsConfig implements WebMvcConfigurer {
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class CorsConfig {
 
     private final String[] allowedOrigins;
 
@@ -20,13 +29,19 @@ public class CorsConfig implements WebMvcConfigurer {
         this.allowedOrigins = allowedOrigins.split("\\s*,\\s*");
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**")
-                .allowedOriginPatterns(allowedOrigins)
-                .allowedMethods("GET", "POST", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(false)
-                .maxAge(3600);
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        for (String origin : allowedOrigins) {
+            config.addAllowedOriginPattern(origin.trim());
+        }
+        config.setAllowedMethods(List.of("GET", "POST", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(false);
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", config);
+        return new CorsFilter(source);
     }
 }
