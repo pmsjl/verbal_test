@@ -72,7 +72,7 @@ export default function AdminPage() {
                 <tr>
                   <Th>记录 ID</Th>
                   <Th>被试 ID</Th>
-                  <Th>编号</Th>
+                  <Th>昵称</Th>
                   <Th>年龄</Th>
                   <Th>性别</Th>
                   <Th>英语水平</Th>

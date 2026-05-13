@@ -10,8 +10,6 @@ interface Props {
 
 type Flash = "correct" | "wrong" | null;
 
-// Vite 构建/dev 时扫描 src/assets/audio/，自动取第一个音频文件。
-// 实验员只需把文件丢进去即可，无需改任何配置或 env。
 const audioModules = import.meta.glob(
   "../assets/audio/*.{mp3,m4a,aac,wav,ogg,opus,flac}",
   { eager: true, query: "?url", import: "default" },
@@ -73,7 +71,7 @@ export default function TestScreen({ condition, onGameOver }: Props) {
     const result = t.answer(choice);
     if (!result) return;
     setFlash(result.correct ? "correct" : "wrong");
-    window.setTimeout(() => setFlash(null), 200);
+    window.setTimeout(() => setFlash(null), 250);
   }
 
   useEffect(() => {
@@ -85,57 +83,71 @@ export default function TestScreen({ condition, onGameOver }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const flashCls =
+  const wordBgCls =
     flash === "correct"
-      ? "animate-flash-correct"
+      ? "bg-emerald-100"
       : flash === "wrong"
         ? "animate-flash-wrong"
         : "";
 
   return (
-    <section className="flex flex-col items-center py-6">
-      <div className="flex gap-8 mb-12 text-gray-600">
-        <div>
-          得分 <span className="text-gray-900 font-bold ml-1.5">{score}</span>
+    <section className="flex flex-col items-center py-6 animate-fade-in">
+      {/* 状态栏 */}
+      <div className="flex gap-10 mb-14">
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs text-gray-400 uppercase tracking-wider">得分</span>
+          <span className="text-3xl font-mono font-bold text-brand tabular-nums">
+            {score}
+          </span>
         </div>
-        <div>
-          生命 <span className="text-gray-900 font-bold ml-1.5">{"♥".repeat(lives)}</span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs text-gray-400 uppercase tracking-wider">生命</span>
+          <span className="flex gap-1 text-2xl">
+            {[1, 2, 3].map((i) => (
+              <span
+                key={i}
+                className={`transition-all duration-300 ${
+                  i <= lives
+                    ? "text-red-500 scale-110"
+                    : "text-gray-300 scale-90"
+                }`}
+              >
+                ♥
+              </span>
+            ))}
+          </span>
         </div>
       </div>
 
+      {/* 单词展示 */}
       <div
-        className={`text-5xl sm:text-6xl font-semibold tracking-wider my-8 min-h-[80px] select-none px-6 py-2 rounded ${flashCls}`}
+        className={`text-5xl sm:text-6xl font-semibold tracking-wider my-8 min-h-[80px] select-none px-8 py-4 rounded-xl transition-colors duration-150 ${wordBgCls}`}
+        key={word}
       >
         {word}
       </div>
 
+      {/* 按钮 */}
       <div className="flex gap-6 mt-12">
-        <AnswerButton onClick={() => answer("SEEN")} label="SEEN" hint="(S)" />
-        <AnswerButton onClick={() => answer("NEW")} label="NEW" hint="(N)" />
+        <button
+          onClick={() => answer("SEEN")}
+          className="min-w-[160px] py-5 px-8 rounded-2xl bg-brand text-white font-bold text-lg hover:bg-indigo-700 active:scale-95 transition-all shadow-md hover:shadow-lg"
+        >
+          SEEN
+          <br />
+          <span className="text-xs text-blue-100 font-normal">按 S</span>
+        </button>
+        <button
+          onClick={() => answer("NEW")}
+          className="min-w-[160px] py-5 px-8 rounded-2xl bg-emerald-500 text-white font-bold text-lg hover:bg-emerald-600 active:scale-95 transition-all shadow-md hover:shadow-lg"
+        >
+          NEW
+          <br />
+          <span className="text-xs text-emerald-100 font-normal">按 N</span>
+        </button>
       </div>
 
       {AUDIO_SRC && <audio ref={audioRef} src={AUDIO_SRC} preload="auto" />}
     </section>
-  );
-}
-
-function AnswerButton({
-  onClick,
-  label,
-  hint,
-}: {
-  onClick: () => void;
-  label: string;
-  hint: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="min-w-[140px] py-4 px-8 border-2 border-gray-300 bg-white rounded-lg font-semibold text-lg hover:bg-gray-100 hover:border-gray-500 active:scale-95 transition-all"
-    >
-      {label}
-      <br />
-      <small className="text-xs text-gray-500 font-normal">{hint}</small>
-    </button>
   );
 }

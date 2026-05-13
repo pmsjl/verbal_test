@@ -1,29 +1,52 @@
 import { useState, type FormEvent } from "react";
+import CustomSelect from "./CustomSelect";
 import { createParticipant, type Condition, type EnglishLevel } from "../lib/api";
 
 interface Props {
   onSubmitted: (participantId: number, condition: Condition) => void;
 }
 
+const GENDER_OPTIONS = [
+  { value: "男", label: "男" },
+  { value: "女", label: "女" },
+  { value: "其他", label: "其他" },
+];
+
+const ENGLISH_OPTIONS = [
+  { value: "1", label: "弱 — 基本英语，专四以下" },
+  { value: "2", label: "中 — 专四 / CET-6 通过" },
+  { value: "3", label: "强 — 专八 / 海外背景" },
+];
+
 export default function InfoForm({ onSubmitted }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  const [nickname, setNickname] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
+  const [englishLevel, setEnglishLevel] = useState("");
+  const [musicHabit, setMusicHabit] = useState("");
+  const [condition, setCondition] = useState<Condition | "">("");
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
-    const fd = new FormData(e.currentTarget);
-    const condition = fd.get("condition") as Condition;
-    const payload = {
-      code: String(fd.get("code") ?? "").trim(),
-      age: parseInt(String(fd.get("age") ?? ""), 10),
-      gender: String(fd.get("gender") ?? ""),
-      english_level: parseInt(String(fd.get("english_level") ?? ""), 10) as EnglishLevel,
-      music_habit: String(fd.get("music_habit") ?? "").trim(),
-    };
+
+    if (!nickname.trim() || !age || !gender || !englishLevel || !musicHabit.trim() || !condition) {
+      setError("请填写所有必填项");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const resp = await createParticipant(payload);
+      const resp = await createParticipant({
+        code: nickname.trim(),
+        age: parseInt(age, 10),
+        gender,
+        english_level: parseInt(englishLevel, 10) as EnglishLevel,
+        music_habit: musicHabit.trim(),
+      });
       onSubmitted(resp.participant_id, condition);
     } catch (err) {
       setError("提交失败：" + (err instanceof Error ? err.message : String(err)));
@@ -32,73 +55,155 @@ export default function InfoForm({ onSubmitted }: Props) {
   }
 
   return (
-    <section className="bg-white rounded-lg shadow-sm p-8">
-      <h1 className="text-2xl font-bold tracking-wide text-center mb-1">
-        Verbal Memory 实验
-      </h1>
-      <p className="text-sm text-gray-500 text-center mb-6">请填写信息后开始</p>
+    <section className="animate-scale-in bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      {/* 标题 */}
+      <div className="px-8 pt-7 pb-5">
+        <h1 className="text-2xl font-bold text-gray-800 text-center tracking-tight">
+          Verbal Memory
+        </h1>
+        <p className="text-sm text-gray-400 text-center mt-1.5 leading-relaxed">
+          一段简短的英文单词记忆测试
+          <br />
+          请先填写以下信息
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col gap-4">
-        <Field label="被试编号">
-          <input name="code" required maxLength={32} placeholder="例 P001" className={inputCls} />
-        </Field>
-        <Field label="年龄">
-          <input type="number" name="age" required min={10} max={100} className={inputCls} />
-        </Field>
-        <Field label="性别">
-          <select name="gender" required defaultValue="" className={inputCls}>
-            <option value="" disabled>请选择</option>
-            <option value="男">男</option>
-            <option value="女">女</option>
-            <option value="其他">其他</option>
-          </select>
-        </Field>
-        <Field label="英语水平自评（1=弱 / 2=中 / 3=强）">
-          <select name="english_level" required defaultValue="" className={inputCls}>
-            <option value="" disabled>请选择</option>
-            <option value="1">1 — 弱（基本英语，专四以下）</option>
-            <option value="2">2 — 中（专四 / CET-6 通过）</option>
-            <option value="3">3 — 强（专八 / 海外背景 / 母语水平）</option>
-          </select>
-        </Field>
-        <Field label="日常听音乐习惯">
-          <input
-            name="music_habit"
-            required
-            maxLength={64}
-            placeholder="例 每天 1 小时，流行/古典"
-            className={inputCls}
-          />
-        </Field>
-        <Field label="实验条件">
-          <select name="condition" required defaultValue="" className={inputCls}>
-            <option value="" disabled>请选择</option>
-            <option value="no_music">不听音乐</option>
-            <option value="music">听音乐</option>
-          </select>
-        </Field>
+      <form onSubmit={handleSubmit} autoComplete="off" className="px-8 pb-8">
+        {/* 个人信息区 */}
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              昵称
+            </label>
+            <input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={32}
+              placeholder="你的昵称"
+              className={inputCls}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                年龄
+              </label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                min={10}
+                max={100}
+                placeholder="18"
+                className={inputCls}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                性别
+              </label>
+              <CustomSelect
+                options={GENDER_OPTIONS}
+                value={gender}
+                onChange={setGender}
+                placeholder="请选择"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              英语水平
+            </label>
+            <CustomSelect
+              options={ENGLISH_OPTIONS}
+              value={englishLevel}
+              onChange={setEnglishLevel}
+              placeholder="请选择你的英语水平"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              日常听音乐习惯
+            </label>
+            <input
+              value={musicHabit}
+              onChange={(e) => setMusicHabit(e.target.value)}
+              maxLength={64}
+              placeholder="如：每天 1 小时，流行 / 古典"
+              className={inputCls}
+            />
+          </div>
+        </div>
+
+        {/* 分割 */}
+        <div className="my-7 flex items-center gap-3">
+          <div className="flex-1 border-t border-gray-100" />
+          <span className="text-xs text-gray-400 font-medium">实验设置</span>
+          <div className="flex-1 border-t border-gray-100" />
+        </div>
+
+        {/* 实验条件 — 两张选卡 */}
+        <div className="mb-7">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            实验条件
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => setCondition("no_music")}
+              className={`rounded-2xl border-2 p-5 text-center transition-all ${
+                condition === "no_music"
+                  ? "border-indigo-300 bg-indigo-50 shadow-sm"
+                  : "border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50/50"
+              }`}
+            >
+              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2">
+                  <path d="M18.36 6.64A9 9 0 0 1 20.77 15" />
+                  <path d="M6.343 6.343a9 9 0 0 0 0 12.728" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-gray-700">不听音乐</p>
+              <p className="text-xs text-gray-400 mt-0.5">全程静音</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => setCondition("music")}
+              className={`rounded-2xl border-2 p-5 text-center transition-all ${
+                condition === "music"
+                  ? "border-indigo-300 bg-indigo-50 shadow-sm"
+                  : "border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50/50"
+              }`}
+            >
+              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2">
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold text-gray-700">听音乐</p>
+              <p className="text-xs text-gray-400 mt-0.5">播放实验音频</p>
+            </button>
+          </div>
+        </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-md bg-brand text-white font-semibold py-3 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+          className="w-full rounded-2xl bg-brand text-white font-semibold py-3.5 text-base hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm"
         >
-          {submitting ? "提交中…" : "下一步"}
+          {submitting ? "提交中…" : "开始实验"}
         </button>
-        {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+        {error && <p className="text-sm text-rose-500 mt-3 text-center">{error}</p>}
       </form>
     </section>
   );
 }
 
 const inputCls =
-  "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:border-brand focus:ring-2 focus:ring-blue-200";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm text-gray-600">
-      <span>{label}</span>
-      {children}
-    </label>
-  );
-}
+  "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 text-sm placeholder:text-gray-300 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 transition-all";

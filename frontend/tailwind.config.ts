@@ -5,11 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: "#4a90e2",
+        brand: "#4f46e5",
       },
       animation: {
         "flash-correct": "flashGreen 200ms ease-out",
         "flash-wrong": "flashRed 200ms ease-out",
+        "fade-in": "fadeIn 400ms ease-out",
+        "scale-in": "scaleIn 350ms ease-out",
+        "pulse-once": "pulseOnce 500ms ease-in-out",
+        "bounce-in": "bounceIn 500ms ease-out",
       },
       keyframes: {
         flashGreen: {
