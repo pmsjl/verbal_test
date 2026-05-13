@@ -3,10 +3,11 @@ import InfoForm from "./components/InfoForm";
 import ReadyScreen from "./components/ReadyScreen";
 import TestScreen from "./components/TestScreen";
 import DoneScreen from "./components/DoneScreen";
+import Leaderboard from "./components/Leaderboard";
 import AdminPage from "./components/AdminPage";
 import type { Condition } from "./lib/api";
 
-type Phase = "info" | "ready" | "test" | "done";
+type Phase = "info" | "ready" | "test" | "done" | "leaderboard";
 
 interface Result {
   score: number;
@@ -56,8 +57,10 @@ export default function App() {
             condition={condition}
             score={result.score}
             durationMs={result.duration_ms}
+            onViewLeaderboard={() => setPhase("leaderboard")}
           />
         )}
+        {phase === "leaderboard" && <Leaderboard />}
       </div>
     </div>
   );

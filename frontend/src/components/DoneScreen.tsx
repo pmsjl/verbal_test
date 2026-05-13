@@ -6,6 +6,7 @@ interface Props {
   condition: Condition;
   score: number;
   durationMs: number;
+  onViewLeaderboard: () => void;
 }
 
 type Status =
@@ -13,7 +14,7 @@ type Status =
   | { kind: "ok" }
   | { kind: "fail"; message: string };
 
-export default function DoneScreen({ participantId, condition, score, durationMs }: Props) {
+export default function DoneScreen({ participantId, condition, score, durationMs, onViewLeaderboard }: Props) {
   const [status, setStatus] = useState<Status>({ kind: "submitting" });
   const submittedRef = useRef(false);
 
@@ -58,6 +59,15 @@ export default function DoneScreen({ participantId, condition, score, durationMs
           status={status}
           fallback={`participant_id=${participantId}, condition=${condition}, score=${score}, duration_ms=${durationMs}`}
         />
+
+        {status.kind === "ok" && (
+          <button
+            onClick={onViewLeaderboard}
+            className="mt-8 rounded-xl border border-gray-200 bg-white text-gray-600 font-medium py-2.5 px-6 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+          >
+            查看排行榜 →
+          </button>
+        )}
       </div>
     </section>
   );
