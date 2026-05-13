@@ -1,8 +1,7 @@
 // Verbal Memory 核心测试逻辑
-// 状态机 + 出题概率 p_seen = n / (n + K)
+// 前 2 轮必出 NEW，第 3 轮起 P(SEEN)=0.6 P(NEW)=0.4
+// 同一词不连续出现，连续 5 次 NEW 后强制出 SEEN
 // 纯 TS，不依赖 React，通过 onTurn / onGameOver 回调暴露状态变化
-
-const K = 3;
 
 export type Answer = "SEEN" | "NEW";
 
@@ -37,6 +36,9 @@ function shuffle<T>(arr: readonly T[]): T[] {
   return a;
 }
 
+const P_SEEN = 0.6;
+const FORCE_SEEN_AFTER_NEW = 5;
+
 export function createVerbalTest({ wordlist, onTurn, onGameOver }: VerbalTestOptions): VerbalTest {
   const pool: string[] = shuffle(wordlist);
   const seen: string[] = [];
@@ -46,18 +48,61 @@ export function createVerbalTest({ wordlist, onTurn, onGameOver }: VerbalTestOpt
   let currentIsSeen = false;
   let startTime = 0;
   let finished = false;
+  let consecutiveNew = 0;
+
+  // 从已见词池选词，排除指定词（避免连续出现同一词）
+  function pickSeen(exclude: string | null): string | null {
+    const candidates = exclude != null ? seen.filter((w) => w !== exclude) : seen;
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
 
   function nextTurn() {
     if (finished) return;
-    const n = seen.length;
-    const showSeen = n > 0 && (pool.length === 0 || Math.random() < n / (n + K));
-    if (showSeen) {
-      currentWord = seen[Math.floor(Math.random() * seen.length)];
-      currentIsSeen = true;
-    } else {
-      currentWord = pool.pop() ?? null;
-      currentIsSeen = false;
+
+    let showSeen: boolean;
+
+    // 前 2 轮（seen 还没词）必出 NEW
+    if (seen.length === 0) {
+      showSeen = false;
     }
+    // 连续 5 个 NEW 后强制出 SEEN
+    else if (consecutiveNew >= FORCE_SEEN_AFTER_NEW) {
+      showSeen = true;
+    }
+    // 正常概率：60% SEEN, 40% NEW
+    else {
+      showSeen = Math.random() < P_SEEN;
+    }
+
+    if (showSeen) {
+      const word = pickSeen(currentWord);
+      if (word === null) {
+        // 排除当前词后无可选，降级出新词
+        showSeen = false;
+      } else {
+        currentWord = word;
+        currentIsSeen = true;
+        consecutiveNew = 0;
+      }
+    }
+
+    if (!showSeen) {
+      const word = pool.pop() ?? null;
+      if (word === null) {
+        // 新词池耗尽，出已见词
+        const fallback = pickSeen(currentWord);
+        if (fallback === null) return; // 极端情况：没有任何可选词
+        currentWord = fallback;
+        currentIsSeen = true;
+        consecutiveNew = 0;
+      } else {
+        currentWord = word;
+        currentIsSeen = false;
+        consecutiveNew += 1;
+      }
+    }
+
     if (currentWord === null) return;
     onTurn({ word: currentWord, score, lives });
   }
