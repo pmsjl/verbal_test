@@ -145,9 +145,8 @@ export default function InfoForm({ onSubmitted }: Props) {
 
         {/* 参与说明 */}
         <div className="mb-5 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-xs text-gray-500 leading-relaxed">
-          为了数据的严谨性，希望你在「听音乐」和「不听音乐」两种条件下各完成一次，顺序不限。
-          <br />
-          对成绩不满意可以多来几次，多次参与时建议沿用同一个昵称，方便我们把你的成绩关联起来。
+          <p>为了数据的严谨性，希望你在「听音乐」和「不听音乐」两种条件下各完成一次</p>
+          <p>如果对成绩不满意可以多来几次，多次参与时建议沿用同一个昵称，方便我们把你的成绩关联起来</p>
         </div>
 
         {/* 实验条件 — 两张选卡 */}
