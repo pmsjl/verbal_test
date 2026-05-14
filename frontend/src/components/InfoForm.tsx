@@ -145,6 +145,11 @@ export default function InfoForm({ onSubmitted }: Props) {
           <div className="flex-1 border-t border-gray-100" />
         </div>
 
+        {/* 参与说明 */}
+        <div className="mb-5 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-xs text-gray-500 leading-relaxed">
+          为了完整的数据，希望你在「听音乐」和「不听音乐」两种条件下各完成一次，顺序不限。对成绩不满意可以再来一次；多次参与时建议沿用同一个昵称，方便我们把你的几次成绩关联起来。
+        </div>
+
         {/* 实验条件 — 两张选卡 */}
         <div className="mb-7">
           <label className="block text-sm font-medium text-gray-700 mb-3">
