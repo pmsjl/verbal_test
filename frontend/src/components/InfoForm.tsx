@@ -63,8 +63,6 @@ export default function InfoForm({ onSubmitted }: Props) {
         </h1>
         <p className="text-sm text-gray-400 text-center mt-1.5 leading-relaxed">
           一段简短的英文单词记忆测试
-          <br />
-          请先填写以下信息
         </p>
       </div>
 
@@ -147,7 +145,9 @@ export default function InfoForm({ onSubmitted }: Props) {
 
         {/* 参与说明 */}
         <div className="mb-5 rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 text-xs text-gray-500 leading-relaxed">
-          为了完整的数据，希望你在「听音乐」和「不听音乐」两种条件下各完成一次，顺序不限。对成绩不满意可以再来一次；多次参与时建议沿用同一个昵称，方便我们把你的几次成绩关联起来。
+          为了数据的严谨性，希望你在「听音乐」和「不听音乐」两种条件下各完成一次，顺序不限。
+          <br />
+          对成绩不满意可以多来几次，多次参与时建议沿用同一个昵称，方便我们把你的成绩关联起来。
         </div>
 
         {/* 实验条件 — 两张选卡 */}
@@ -159,11 +159,10 @@ export default function InfoForm({ onSubmitted }: Props) {
             <button
               type="button"
               onClick={() => setCondition("no_music")}
-              className={`rounded-2xl border-2 p-5 text-center transition-all ${
-                condition === "no_music"
-                  ? "border-indigo-300 bg-indigo-50 shadow-sm"
-                  : "border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50/50"
-              }`}
+              className={`rounded-2xl border-2 p-5 text-center transition-all ${condition === "no_music"
+                ? "border-indigo-300 bg-indigo-50 shadow-sm"
+                : "border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50/50"
+                }`}
             >
               <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2">
@@ -178,11 +177,10 @@ export default function InfoForm({ onSubmitted }: Props) {
             <button
               type="button"
               onClick={() => setCondition("music")}
-              className={`rounded-2xl border-2 p-5 text-center transition-all ${
-                condition === "music"
-                  ? "border-indigo-300 bg-indigo-50 shadow-sm"
-                  : "border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50/50"
-              }`}
+              className={`rounded-2xl border-2 p-5 text-center transition-all ${condition === "music"
+                ? "border-indigo-300 bg-indigo-50 shadow-sm"
+                : "border-gray-150 bg-white hover:border-gray-300 hover:bg-gray-50/50"
+                }`}
             >
               <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-100 flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" strokeWidth="2">
