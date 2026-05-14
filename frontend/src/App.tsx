@@ -29,7 +29,7 @@ export default function App() {
 
   return (
     <div className="min-h-full flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-xl" key={phase}>
+      <div className={`w-full ${phase === "leaderboard" ? "max-w-4xl" : "max-w-xl"}`} key={phase}>
         {phase === "info" && (
           <InfoForm
             onSubmitted={(id, c) => {

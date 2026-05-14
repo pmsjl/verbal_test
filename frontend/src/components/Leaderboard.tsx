@@ -93,7 +93,7 @@ function GroupCard({
                 <td className="text-center px-3 py-2.5">
                   {medal(i) ?? <span className="text-gray-300 text-xs font-medium">{i + 1}</span>}
                 </td>
-                <td className="px-3 py-2.5 font-medium text-gray-700 truncate max-w-[120px]">
+                <td className="px-3 py-2.5 font-medium text-gray-700 truncate">
                   {r.code}
                 </td>
                 <td className="text-right px-3 py-2.5 font-mono font-bold text-brand tabular-nums">
