@@ -17,7 +17,7 @@ import java.util.List;
  *
  * 允许来源通过 app.cors.allowed-origins（环境变量 ALLOWED_ORIGINS）配置：
  * - 本地开发默认 "*"
- * - 线上设置成具体的前端域名，例 https://verbal.example.com
+ * - 线上设置成具体的前端域名，例 https://your-frontend-domain.com
  */
 @Configuration
 @Order(Ordered.HIGHEST_PRECEDENCE)

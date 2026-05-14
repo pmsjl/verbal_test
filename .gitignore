@@ -43,5 +43,8 @@ logs/
 # Claude Code 本地配置（每个人自己的 settings，不进仓库）
 .claude/
 
+# Claude Code 项目文档（含部署详情，不公开）
+CLAUDE.md
+
 # OS
 $RECYCLE.BIN/
