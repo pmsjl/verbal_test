@@ -6,6 +6,40 @@ interface Props {
   onSubmitted: (participantId: number, condition: Condition) => void;
 }
 
+/* ---------- localStorage 缓存 ---------- */
+
+const STORAGE_KEY = "verbal_participant_info";
+
+interface CachedInfo {
+  nickname: string;
+  age: string;
+  gender: string;
+  englishLevel: string;
+  musicHabit: string;
+}
+
+function loadCachedInfo(): CachedInfo | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.nickname === "string") return parsed as CachedInfo;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function saveCachedInfo(info: CachedInfo) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+  } catch {
+    // quota 满或隐私模式，静默忽略
+  }
+}
+
+/* --------------------------------------- */
+
 const GENDER_OPTIONS = [
   { value: "男", label: "男" },
   { value: "女", label: "女" },
@@ -19,14 +53,16 @@ const ENGLISH_OPTIONS = [
 ];
 
 export default function InfoForm({ onSubmitted }: Props) {
+  const [cachedInfo] = useState(() => loadCachedInfo());
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [hasCachedData, setHasCachedData] = useState(cachedInfo !== null);
 
-  const [nickname, setNickname] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("");
-  const [englishLevel, setEnglishLevel] = useState("");
-  const [musicHabit, setMusicHabit] = useState("");
+  const [nickname, setNickname] = useState(cachedInfo?.nickname ?? "");
+  const [age, setAge] = useState(cachedInfo?.age ?? "");
+  const [gender, setGender] = useState(cachedInfo?.gender ?? "");
+  const [englishLevel, setEnglishLevel] = useState(cachedInfo?.englishLevel ?? "");
+  const [musicHabit, setMusicHabit] = useState(cachedInfo?.musicHabit ?? "");
   const [condition, setCondition] = useState<Condition | "">("");
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -47,11 +83,28 @@ export default function InfoForm({ onSubmitted }: Props) {
         english_level: parseInt(englishLevel, 10) as EnglishLevel,
         music_habit: musicHabit.trim(),
       });
+      saveCachedInfo({
+        nickname: nickname.trim(),
+        age,
+        gender,
+        englishLevel,
+        musicHabit: musicHabit.trim(),
+      });
       onSubmitted(resp.participant_id, condition);
     } catch (err) {
       setError("提交失败：" + (err instanceof Error ? err.message : String(err)));
       setSubmitting(false);
     }
+  }
+
+  function handleClearCache() {
+    localStorage.removeItem(STORAGE_KEY);
+    setNickname("");
+    setAge("");
+    setGender("");
+    setEnglishLevel("");
+    setMusicHabit("");
+    setHasCachedData(false);
   }
 
   return (
@@ -67,6 +120,23 @@ export default function InfoForm({ onSubmitted }: Props) {
       </div>
 
       <form onSubmit={handleSubmit} autoComplete="off" className="px-8 pb-8">
+        {/* 欢迎回来提示 */}
+        {hasCachedData && (
+          <div className="mb-5 rounded-xl bg-indigo-50/50 border border-indigo-100 px-4 py-2.5 text-xs text-gray-500 flex items-center justify-between">
+            <span>
+              欢迎回来，<span className="font-medium text-gray-700">{cachedInfo?.nickname}</span>
+              ！信息已自动填写，请选择本次实验条件。
+            </span>
+            <button
+              type="button"
+              onClick={handleClearCache}
+              className="text-gray-400 hover:text-gray-600 underline underline-offset-2 ml-3 shrink-0"
+            >
+              清除记录
+            </button>
+          </div>
+        )}
+
         {/* 个人信息区 */}
         <div className="space-y-5">
           <div>
