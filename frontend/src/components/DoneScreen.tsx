@@ -7,6 +7,7 @@ interface Props {
   score: number;
   durationMs: number;
   onViewLeaderboard: () => void;
+  onNewRound: () => void;
 }
 
 type Status =
@@ -14,7 +15,7 @@ type Status =
   | { kind: "ok" }
   | { kind: "fail"; message: string };
 
-export default function DoneScreen({ participantId, condition, score, durationMs, onViewLeaderboard }: Props) {
+export default function DoneScreen({ participantId, condition, score, durationMs, onViewLeaderboard, onNewRound }: Props) {
   const [status, setStatus] = useState<Status>({ kind: "submitting" });
   const submittedRef = useRef(false);
 
@@ -61,12 +62,20 @@ export default function DoneScreen({ participantId, condition, score, durationMs
         />
 
         {status.kind === "ok" && (
-          <button
-            onClick={onViewLeaderboard}
-            className="mt-8 rounded-xl border border-gray-200 bg-white text-gray-600 font-medium py-2.5 px-6 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
-          >
-            查看排行榜 →
-          </button>
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <button
+              onClick={onNewRound}
+              className="rounded-xl border border-gray-200 bg-white text-gray-600 font-medium py-2.5 px-6 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+            >
+              ← 返回首页
+            </button>
+            <button
+              onClick={onViewLeaderboard}
+              className="rounded-xl border border-gray-200 bg-white text-gray-600 font-medium py-2.5 px-6 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+            >
+              查看排行榜 →
+            </button>
+          </div>
         )}
       </div>
     </section>

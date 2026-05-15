@@ -25,6 +25,13 @@ export default function App() {
   const [condition, setCondition] = useState<Condition | null>(null);
   const [result, setResult] = useState<Result | null>(null);
 
+  const handleBackToForm = () => {
+    setParticipantId(null);
+    setCondition(null);
+    setResult(null);
+    setPhase("info");
+  };
+
   if (isAdmin) return <AdminPage />;
 
   return (
@@ -58,9 +65,10 @@ export default function App() {
             score={result.score}
             durationMs={result.duration_ms}
             onViewLeaderboard={() => setPhase("leaderboard")}
+            onNewRound={handleBackToForm}
           />
         )}
-        {phase === "leaderboard" && <Leaderboard />}
+        {phase === "leaderboard" && <Leaderboard onNewRound={handleBackToForm} />}
       </div>
     </div>
   );

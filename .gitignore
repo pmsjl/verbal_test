@@ -46,5 +46,7 @@ logs/
 # Claude Code 项目文档（含部署详情，不公开）
 CLAUDE.md
 
+AGENTS.md
+
 # OS
 $RECYCLE.BIN/

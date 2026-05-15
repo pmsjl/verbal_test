@@ -8,7 +8,7 @@ const medal = (rank: number): string | null => {
   return null;
 };
 
-export default function Leaderboard() {
+export default function Leaderboard({ onNewRound }: { onNewRound: () => void }) {
   const [records, setRecords] = useState<RecordView[] | null>(null);
   const [error, setError] = useState("");
 
@@ -40,7 +40,16 @@ export default function Leaderboard() {
   return (
     <section className="animate-fade-in">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-1">排行榜</h2>
-      <p className="text-sm text-gray-400 text-center mb-6">各组前十名</p>
+      <p className="text-sm text-gray-400 text-center mb-4">各组前十名</p>
+
+      <div className="flex justify-center mb-6">
+        <button
+          onClick={onNewRound}
+          className="rounded-xl border border-gray-200 bg-white text-gray-600 font-medium py-2.5 px-6 text-sm hover:bg-gray-50 hover:border-gray-300 transition-colors"
+        >
+          ← 返回首页
+        </button>
+      </div>
 
       {records.length === 0 ? (
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 px-8 py-8 text-center">

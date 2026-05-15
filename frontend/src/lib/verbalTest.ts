@@ -1,5 +1,5 @@
 // Verbal Memory 核心测试逻辑
-// 前 2 轮必出 NEW，第 3 轮起 P(SEEN)=0.6 P(NEW)=0.4
+// 前 2 轮必出 NEW，第 3 轮起 P(SEEN)=0.4 P(NEW)=0.6
 // 同一词不连续出现，连续 5 次 NEW 后强制出 SEEN
 // 纯 TS，不依赖 React，通过 onTurn / onGameOver 回调暴露状态变化
 
@@ -36,7 +36,7 @@ function shuffle<T>(arr: readonly T[]): T[] {
   return a;
 }
 
-const P_SEEN = 0.6;
+const P_SEEN = 0.4;
 const FORCE_SEEN_AFTER_NEW = 5;
 
 export function createVerbalTest({ wordlist, onTurn, onGameOver }: VerbalTestOptions): VerbalTest {
@@ -70,7 +70,7 @@ export function createVerbalTest({ wordlist, onTurn, onGameOver }: VerbalTestOpt
     else if (consecutiveNew >= FORCE_SEEN_AFTER_NEW) {
       showSeen = true;
     }
-    // 正常概率：60% SEEN, 40% NEW
+    // 正常概率：40% SEEN, 60% NEW
     else {
       showSeen = Math.random() < P_SEEN;
     }
