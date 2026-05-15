@@ -39,14 +39,16 @@ export default function ReadyScreen({ condition, onStart }: Props) {
           <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3">
             <p className="text-emerald-600 font-semibold text-sm mb-1">NEW — 没见过</p>
             <p className="text-gray-500 text-xs">
-              该词在本轮测试中第一次出现，选择 NEW
+              该词在本轮测试中第一次出现，
             </p>
+            <p>选择 NEW</p>
           </div>
           <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 px-4 py-3">
             <p className="text-indigo-600 font-semibold text-sm mb-1">SEEN — 见过</p>
             <p className="text-gray-500 text-xs">
-              该词在本轮中已经出现过，选择 SEEN
+              该词在本轮中已经出现过，
             </p>
+            <p>选择 SEEN</p>
           </div>
         </div>
 
