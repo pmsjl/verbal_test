@@ -26,7 +26,7 @@ export default function ReadyScreen({ condition, onStart }: Props) {
               屏幕逐一显示英文单词，你需要判断每个词是<strong className="text-gray-700">第一次出现（NEW）</strong>还是<strong className="text-gray-700">已经出现过（SEEN）</strong>
             </p>
             <p>
-              初始有 <strong className="text-gray-700">3 条命</strong>，答错扣 1 命，全部扣完则测试结束
+              初始有 <strong className="text-gray-700">1 条命</strong>，答错即结束
             </p>
             <p>
               答对得分 +1；随着测试推进，记忆难度逐渐增加

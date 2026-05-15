@@ -28,7 +28,7 @@ if (audioPaths.length > 1) {
 export default function TestScreen({ condition, onGameOver }: Props) {
   const [word, setWord] = useState("—");
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(1);
   const [flash, setFlash] = useState<Flash>(null);
 
   const testRef = useRef<VerbalTest | null>(null);
@@ -103,7 +103,7 @@ export default function TestScreen({ condition, onGameOver }: Props) {
         <div className="flex flex-col items-center gap-1">
           <span className="text-xs text-gray-400 uppercase tracking-wider">生命</span>
           <span className="flex gap-1 text-2xl">
-            {[1, 2, 3].map((i) => (
+            {[1].map((i) => (
               <span
                 key={i}
                 className={`transition-all duration-300 ${

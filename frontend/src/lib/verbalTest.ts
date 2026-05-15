@@ -43,7 +43,7 @@ export function createVerbalTest({ wordlist, onTurn, onGameOver }: VerbalTestOpt
   const pool: string[] = shuffle(wordlist);
   const seen: string[] = [];
   let score = 0;
-  let lives = 3;
+  let lives = 1;
   let currentWord: string | null = null;
   let currentIsSeen = false;
   let startTime = 0;

@@ -43,7 +43,6 @@ function saveCachedInfo(info: CachedInfo) {
 const GENDER_OPTIONS = [
   { value: "男", label: "男" },
   { value: "女", label: "女" },
-  { value: "其他", label: "其他" },
 ];
 
 const ENGLISH_OPTIONS = [
