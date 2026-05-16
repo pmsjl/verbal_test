@@ -11,7 +11,6 @@ public record RecordView(
         String code,
         Integer age,
         String gender,
-        Integer englishLevel,
         String musicHabit,
         String condition,
         Integer score,

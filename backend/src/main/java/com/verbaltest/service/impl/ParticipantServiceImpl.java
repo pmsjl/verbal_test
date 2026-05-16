@@ -23,7 +23,6 @@ public class ParticipantServiceImpl implements ParticipantService {
         p.setCode(req.code());
         p.setAge(req.age());
         p.setGender(req.gender());
-        p.setEnglishLevel(req.englishLevel());
         p.setMusicHabit(req.musicHabit());
         p.setCreatedAt(LocalDateTime.now());
         participantMapper.insert(p);

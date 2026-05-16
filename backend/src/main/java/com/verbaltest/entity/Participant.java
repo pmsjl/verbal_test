@@ -16,8 +16,6 @@ public class Participant {
     private String code;
     private Integer age;
     private String gender;
-    /** 英语水平自评：1=弱 / 2=中 / 3=强。 */
-    private Integer englishLevel;
     private String musicHabit;
     private LocalDateTime createdAt;
 }

@@ -17,7 +17,7 @@ CREATE TABLE participant (
   code            VARCHAR(32)  NOT NULL COMMENT '被试编号，实验员指定',
   age             INT          NOT NULL,
   gender          VARCHAR(8)   NOT NULL,
-  english_level   TINYINT      NOT NULL COMMENT '英语水平自评，1=弱 / 2=中 / 3=强',
+
   music_habit     VARCHAR(64)  NOT NULL COMMENT '日常听音乐习惯（频率/类型）',
   created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import CustomSelect from "./CustomSelect";
-import { createParticipant, type Condition, type EnglishLevel } from "../lib/api";
+import { createParticipant, type Condition } from "../lib/api";
 
 interface Props {
   onSubmitted: (participantId: number, condition: Condition) => void;
@@ -14,7 +14,6 @@ interface CachedInfo {
   nickname: string;
   age: string;
   gender: string;
-  englishLevel: string;
   musicHabit: string;
 }
 
@@ -45,12 +44,6 @@ const GENDER_OPTIONS = [
   { value: "女", label: "女" },
 ];
 
-const ENGLISH_OPTIONS = [
-  { value: "1", label: "弱 — 基本英语，专四以下" },
-  { value: "2", label: "中 — 专四 / CET-6 通过" },
-  { value: "3", label: "强 — 专八 / 海外背景" },
-];
-
 export default function InfoForm({ onSubmitted }: Props) {
   const [cachedInfo] = useState(() => loadCachedInfo());
   const [submitting, setSubmitting] = useState(false);
@@ -60,7 +53,6 @@ export default function InfoForm({ onSubmitted }: Props) {
   const [nickname, setNickname] = useState(cachedInfo?.nickname ?? "");
   const [age, setAge] = useState(cachedInfo?.age ?? "");
   const [gender, setGender] = useState(cachedInfo?.gender ?? "");
-  const [englishLevel, setEnglishLevel] = useState(cachedInfo?.englishLevel ?? "");
   const [musicHabit, setMusicHabit] = useState(cachedInfo?.musicHabit ?? "");
   const [condition, setCondition] = useState<Condition | "">("");
 
@@ -68,7 +60,7 @@ export default function InfoForm({ onSubmitted }: Props) {
     e.preventDefault();
     setError("");
 
-    if (!nickname.trim() || !age || !gender || !englishLevel || !musicHabit.trim() || !condition) {
+    if (!nickname.trim() || !age || !gender || !musicHabit.trim() || !condition) {
       setError("请填写所有必填项");
       return;
     }
@@ -79,14 +71,12 @@ export default function InfoForm({ onSubmitted }: Props) {
         code: nickname.trim(),
         age: parseInt(age, 10),
         gender,
-        english_level: parseInt(englishLevel, 10) as EnglishLevel,
         music_habit: musicHabit.trim(),
       });
       saveCachedInfo({
         nickname: nickname.trim(),
         age,
         gender,
-        englishLevel,
         musicHabit: musicHabit.trim(),
       });
       onSubmitted(resp.participant_id, condition);
@@ -101,7 +91,6 @@ export default function InfoForm({ onSubmitted }: Props) {
     setNickname("");
     setAge("");
     setGender("");
-    setEnglishLevel("");
     setMusicHabit("");
     setHasCachedData(false);
   }
@@ -177,18 +166,6 @@ export default function InfoForm({ onSubmitted }: Props) {
                 placeholder="请选择"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              英语水平
-            </label>
-            <CustomSelect
-              options={ENGLISH_OPTIONS}
-              value={englishLevel}
-              onChange={setEnglishLevel}
-              placeholder="请选择你的英语水平"
-            />
           </div>
 
           <div>

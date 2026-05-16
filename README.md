@@ -7,7 +7,7 @@ A web-based experimental platform for studying the effects of music on short-ter
 - **Between-subjects design**: two groups — *music* vs *no music*
 - **Task**: judge whether each displayed English word is NEW (first time seen) or SEEN (seen before in this session)
 - **Metrics collected**: final score and completion time
-- **Covariate**: self-reported English proficiency (3-level ordinal scale)
+- **Covariate**: music listening habits (self-reported)
 
 Participants start with 3 lives; each wrong answer costs 1 life. The test ends when all lives are lost.
 

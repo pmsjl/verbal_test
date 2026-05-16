@@ -2,14 +2,10 @@ const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8080";
 
 export type Condition = "no_music" | "music";
 
-/** 1=弱 / 2=中 / 3=强（自评，前端表单只允许 1/2/3）。 */
-export type EnglishLevel = 1 | 2 | 3;
-
 export interface ParticipantInfo {
   code: string;
   age: number;
   gender: string;
-  english_level: EnglishLevel;
   music_habit: string;
 }
 
@@ -34,7 +30,6 @@ export interface RecordView {
   code: string;
   age: number | null;
   gender: string | null;
-  english_level: EnglishLevel | null;
   music_habit: string | null;
   condition: Condition;
   score: number;

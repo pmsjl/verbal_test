@@ -55,7 +55,7 @@ public class RecordServiceImpl implements RecordService {
         List<RecordView> rows = loadJoined();
         StringWriter sw = new StringWriter();
         try (PrintWriter w = new PrintWriter(sw)) {
-            w.println("record_id,participant_id,code,age,gender,english_level,music_habit," +
+            w.println("record_id,participant_id,code,age,gender,music_habit," +
                     "condition,score,duration_ms,tested_at");
             for (RecordView v : rows) {
                 w.print(v.id()); w.print(',');
@@ -63,7 +63,6 @@ public class RecordServiceImpl implements RecordService {
                 w.print(csv(v.code())); w.print(',');
                 w.print(v.age() == null ? "" : v.age()); w.print(',');
                 w.print(csv(v.gender())); w.print(',');
-                w.print(csv(v.englishLevel())); w.print(',');
                 w.print(csv(v.musicHabit())); w.print(',');
                 w.print(csv(v.condition())); w.print(',');
                 w.print(v.score()); w.print(',');
@@ -97,7 +96,6 @@ public class RecordServiceImpl implements RecordService {
                     p == null ? null : p.getCode(),
                     p == null ? null : p.getAge(),
                     p == null ? null : p.getGender(),
-                    p == null ? null : p.getEnglishLevel(),
                     p == null ? null : p.getMusicHabit(),
                     r.getCondition(),
                     r.getScore(),

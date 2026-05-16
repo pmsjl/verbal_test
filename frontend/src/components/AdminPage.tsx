@@ -1,16 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { listRecords, deleteRecord, batchDeleteRecords, exportCsvUrl, type EnglishLevel, type RecordView } from "../lib/api";
-
-const ENGLISH_LABELS: Record<EnglishLevel, string> = {
-  1: "弱",
-  2: "中",
-  3: "强",
-};
-
-function englishLabel(level: EnglishLevel | null): string {
-  if (level === null) return "";
-  return `${level} — ${ENGLISH_LABELS[level] ?? ""}`;
-}
+import { listRecords, deleteRecord, batchDeleteRecords, exportCsvUrl, type RecordView } from "../lib/api";
 
 export default function AdminPage() {
   const [records, setRecords] = useState<RecordView[] | null>(null);
@@ -134,7 +123,6 @@ export default function AdminPage() {
                   <Th>昵称</Th>
                   <Th>年龄</Th>
                   <Th>性别</Th>
-                  <Th>英语水平</Th>
                   <Th>音乐习惯</Th>
                   <Th>条件</Th>
                   <Th>得分</Th>
@@ -159,7 +147,6 @@ export default function AdminPage() {
                     <Td>{r.code}</Td>
                     <Td>{r.age ?? ""}</Td>
                     <Td>{r.gender ?? ""}</Td>
-                    <Td>{englishLabel(r.english_level)}</Td>
                     <Td>{r.music_habit ?? ""}</Td>
                     <Td>
                       <span
