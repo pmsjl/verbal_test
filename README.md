@@ -92,6 +92,20 @@ pnpm dev
 
 Drop a single audio file (MP3/FLAC/WAV/etc.) into `frontend/src/assets/audio/`. It will be auto-detected at build time — no configuration needed.
 
+## 生产部署
+
+当前生产环境采用 Docker Compose + Cloudflare Tunnel：
+
+- 前端部署于 Cloudflare Pages：`https://verbal.pmsjl.com`；
+- Spring Boot 后端与 MySQL 部署于阿里云 ECS；
+- 后端与 MySQL 位于 Docker bridge network `verbal-net`，通过 Compose service DNS 通信；
+- MySQL 使用 Docker named volume `verbal_mysql_data` 持久化；
+- 后端仅映射至 ECS `127.0.0.1:8080`；
+- `verbal-api.pmsjl.com` 通过 remotely-managed Cloudflare Tunnel 转发至后端；
+- 当前生产请求链路不依赖 Nginx / Certbot。
+
+详细部署说明见 [`deploy/README.md`](./deploy/README.md)。
+
 ## Admin Panel
 
 Visit `?admin=1` to access the admin page for viewing, exporting, and deleting records.

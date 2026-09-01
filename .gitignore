@@ -34,8 +34,12 @@ logs/
 
 !frontend/src/assets/audio/README.md
 
+# 数据库备份
+backups/
+
 # 环境变量 / 密钥
 .env
+mysql.env
 .env.production
 .env.development
 *.env.local
@@ -50,3 +54,6 @@ AGENTS.md
 
 # OS
 $RECYCLE.BIN/
+
+# Generated analysis/rendering artifacts (keep local, do not commit)
+outputs/
