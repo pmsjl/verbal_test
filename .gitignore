@@ -47,6 +47,9 @@ mysql.env
 # Claude Code 本地配置（每个人自己的 settings，不进仓库）
 .claude/
 
+# Claude Code java-upgrade 本地钩子
+.github/java-upgrade/
+
 # Claude Code 项目文档（含部署详情，不公开）
 CLAUDE.md
 
