@@ -2,6 +2,10 @@
 
 A web-based experimental platform for studying the effects of music on short-term verbal memory, inspired by [humanbenchmark.com](https://humanbenchmark.com)'s Verbal Memory test.
 
+<p align="center">
+  <img src="docs/screenshots/verbal.webp" alt="Verbal Memory test interface" width="420" />
+</p>
+
 ## Experiment Design
 
 - **Between-subjects design**: two groups — *music* vs *no music*
