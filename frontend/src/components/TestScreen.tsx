@@ -33,6 +33,7 @@ export default function TestScreen({ condition, onGameOver }: Props) {
 
   const testRef = useRef<VerbalTest | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const answerLockedRef = useRef(false);
 
   useEffect(() => {
     const test = createVerbalTest({
@@ -66,16 +67,26 @@ export default function TestScreen({ condition, onGameOver }: Props) {
   }, [condition, onGameOver]);
 
   function answer(choice: Answer) {
+    // 点击与键盘事件可能在同一帧同时到达；只允许其中一个进入状态机。
+    if (answerLockedRef.current) return;
     const t = testRef.current;
     if (!t) return;
+    answerLockedRef.current = true;
     const result = t.answer(choice);
-    if (!result) return;
+    if (!result) {
+      answerLockedRef.current = false;
+      return;
+    }
     setFlash(result.correct ? "correct" : "wrong");
     window.setTimeout(() => setFlash(null), 250);
+    window.setTimeout(() => {
+      answerLockedRef.current = false;
+    }, 50);
   }
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.repeat) return;
       if (e.key === "s" || e.key === "S") answer("SEEN");
       if (e.key === "n" || e.key === "N") answer("NEW");
     }

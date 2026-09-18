@@ -21,8 +21,9 @@
 - **生命值**：初始 1 条命，答错一次游戏结束。
 - **计分**：`score` = 答对总次数。
 - **键盘快捷键**：`N` = New（新词），`S` = Seen（已见）。也可点击屏幕按钮。
-- **词库**：`frontend/src/data/wordlist.ts`，约 6400 个去重英文高频词（由两份专四/专八高频词表合并生成）。
-- **难度曲线**：保证开头为新词，此后每轮约 40% 概率出「已见词」、60% 出新词；同一词不会紧挨着连续出现；连续 5 个新词后必定插入一个已见词。详见 `frontend/src/lib/verbalTest.ts`。
+- **词库**：`frontend/src/data/wordlist.ts`，当前共 6423 个去重英文高频词（由两份专四/专八高频词表合并生成）。每轮开始时复制并用 Fisher–Yates 洗牌，NEW 词只从该轮尚未出现的池中取出。
+- **NEW / SEEN 状态机**：前 2 题固定为 NEW；之后每题以 40% 概率选择 SEEN、60% 概率选择 NEW。SEEN 只从本轮已经展示过的词中抽取，NEW 只从未展示池抽取；同一词不会紧挨出现，连续 5 个 NEW 后强制插入 SEEN。该比例是长期概率目标，不承诺任意短局都精确等于 40%。详见 `frontend/src/lib/verbalTest.ts`。
+- **状态转换**：开始时 `IDLE → AWAITING_ANSWER`；答对时 `AWAITING_ANSWER → IDLE（结算）→ AWAITING_ANSWER（下一题）`；答错且生命归零后进入 `FINISHED`。状态机只在 `AWAITING_ANSWER` 接受答案，界面另加短输入锁，避免点击与快捷键造成重复结算。
 
 ## 采集数据
 
