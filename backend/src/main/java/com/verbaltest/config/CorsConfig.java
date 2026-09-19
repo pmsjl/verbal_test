@@ -16,7 +16,7 @@ import java.util.List;
  * 并且提升到最高优先级，确保错误响应（400/404/500 等）也能带上 CORS 头。
  *
  * 允许来源通过 app.cors.allowed-origins（环境变量 ALLOWED_ORIGINS）配置：
- * - 本地开发默认 "*"
+ * - 本地开发默认允许 Vite 的 5173/4173 端口
  * - 线上设置成具体的前端域名，例 https://your-frontend-domain.com
  */
 @Configuration
@@ -37,7 +37,8 @@ public class CorsConfig {
         }
         config.setAllowedMethods(List.of("GET", "POST", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        // 管理端使用跨源 Session Cookie，不能再使用 allowCredentials=false。
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -2,6 +2,7 @@ package com.verbaltest.service;
 
 import com.verbaltest.dto.RecordCreateRequest;
 import com.verbaltest.dto.RecordView;
+import com.verbaltest.dto.LeaderboardEntry;
 
 import java.util.List;
 
@@ -11,6 +12,9 @@ public interface RecordService {
 
     /** 列出全部测试记录，已扁平化关联 participant 信息。 */
     List<RecordView> listAll();
+
+    /** 公开排行榜；每组最多十条且不暴露被试资料。 */
+    List<LeaderboardEntry> leaderboard();
 
     /** 导出全部记录关联被试信息为 CSV 字符串。 */
     String exportCsv();

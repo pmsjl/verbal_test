@@ -3,6 +3,7 @@ package com.verbaltest.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.verbaltest.dto.RecordCreateRequest;
 import com.verbaltest.dto.RecordView;
+import com.verbaltest.dto.LeaderboardEntry;
 import com.verbaltest.entity.Participant;
 import com.verbaltest.entity.TestRecord;
 import com.verbaltest.mapper.ParticipantMapper;
@@ -15,6 +16,8 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -48,6 +51,25 @@ public class RecordServiceImpl implements RecordService {
     @Override
     public List<RecordView> listAll() {
         return loadJoined();
+    }
+
+    @Override
+    public List<LeaderboardEntry> leaderboard() {
+        List<RecordView> sorted = new ArrayList<>(loadJoined());
+        sorted.sort(Comparator.comparing(RecordView::score).reversed()
+                .thenComparing(RecordView::durationMs)
+                .thenComparing(RecordView::id));
+
+        Map<String, Integer> counts = new HashMap<>();
+        List<LeaderboardEntry> result = new ArrayList<>(20);
+        for (RecordView row : sorted) {
+            int count = counts.getOrDefault(row.condition(), 0);
+            if (count >= 10) continue;
+            result.add(new LeaderboardEntry(
+                    row.id(), row.code(), row.condition(), row.score(), row.durationMs()));
+            counts.put(row.condition(), count + 1);
+        }
+        return result;
     }
 
     @Override

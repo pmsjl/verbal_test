@@ -26,7 +26,7 @@ cp .env.example .env
 cp mysql.env.example mysql.env
 ```
 
-修改两个文件中的生产密码。`.env`、`mysql.env`、数据库备份和 Tunnel token 禁止提交到 Git。
+修改两个文件中的生产密码。特别是 `.env` 中的 `ADMIN_PASSWORD` 必须改成长随机密码；生产站点保持 `SESSION_COOKIE_SECURE=true`，并将 `ALLOWED_ORIGINS` 精确设为前端域名。`.env`、`mysql.env`、数据库备份和 Tunnel token 禁止提交到 Git。
 
 ## 3. 构建与启动
 
@@ -64,12 +64,11 @@ HTTP http://localhost:8080
 ## 5. 验证
 
 ```bash
-curl http://127.0.0.1:8080/api/records
-curl https://verbal-api.pmsjl.com/api/records
-curl -OJ https://verbal-api.pmsjl.com/api/records/export
+curl -i https://verbal-api.pmsjl.com/api/records
+curl https://verbal-api.pmsjl.com/api/records/leaderboard
 ```
 
-前端访问 `https://verbal.pmsjl.com`，管理页为 `?admin=1`。当前管理页仍没有鉴权，不应将该入口当作公开管理系统。
+第一条应返回 `401 Unauthorized`，排行榜接口应返回不含年龄、性别和音乐习惯的公开数据。前端访问 `https://verbal.pmsjl.com/?admin=1`，使用 `.env` 中配置的管理员账号登录，再验证查询、CSV 导出、删除与退出登录。
 
 ## 6. 更新与数据安全
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listRecords, type RecordView } from "../lib/api";
+import { listLeaderboard, type LeaderboardEntry } from "../lib/api";
 
 const medal = (rank: number): string | null => {
   if (rank === 0) return "🥇";
@@ -9,11 +9,11 @@ const medal = (rank: number): string | null => {
 };
 
 export default function Leaderboard({ onNewRound }: { onNewRound: () => void }) {
-  const [records, setRecords] = useState<RecordView[] | null>(null);
+  const [records, setRecords] = useState<LeaderboardEntry[] | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    listRecords()
+    listLeaderboard()
       .then((data) => setRecords(data.sort((a, b) => b.score - a.score)))
       .catch((err) => setError(err instanceof Error ? err.message : String(err)));
   }, []);
@@ -70,7 +70,7 @@ function GroupCard({
   records,
 }: {
   title: string;
-  records: RecordView[];
+  records: LeaderboardEntry[];
 }) {
   return (
     <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">

@@ -1,11 +1,26 @@
 import { useEffect, useState, useCallback } from "react";
-import { listRecords, deleteRecord, batchDeleteRecords, exportCsvUrl, type RecordView } from "../lib/api";
+import {
+  adminLogin,
+  adminLogout,
+  ApiError,
+  batchDeleteRecords,
+  deleteRecord,
+  downloadRecordsCsv,
+  getAdminSession,
+  listRecords,
+  type RecordView,
+} from "../lib/api";
 
 export default function AdminPage() {
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("");
+  const [authBusy, setAuthBusy] = useState(false);
   const [records, setRecords] = useState<RecordView[] | null>(null);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [confirm, setConfirm] = useState<{ kind: "single"; id: number } | { kind: "batch"; ids: number[] } | null>(null);
 
   async function refresh() {
@@ -15,13 +30,67 @@ export default function AdminPage() {
       setRecords(data);
       setSelected(new Set());
     } catch (err) {
+      if (err instanceof ApiError && err.status === 401) setAuthenticated(false);
       setError(err instanceof Error ? err.message : String(err));
     }
   }
 
   useEffect(() => {
-    refresh();
+    getAdminSession()
+      .then((session) => {
+        setAuthenticated(session.authenticated);
+        if (session.authenticated) return refresh();
+      })
+      .catch((err) => {
+        setAuthenticated(false);
+        setError(err instanceof Error ? err.message : String(err));
+      });
   }, []);
+
+  async function handleLogin(event: React.FormEvent) {
+    event.preventDefault();
+    setAuthBusy(true);
+    setError("");
+    try {
+      await adminLogin(username, password);
+      setPassword("");
+      setAuthenticated(true);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof ApiError && err.status === 401
+        ? "用户名或密码错误"
+        : err instanceof Error ? err.message : String(err));
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleLogout() {
+    setAuthBusy(true);
+    setError("");
+    try {
+      await adminLogout();
+      setRecords(null);
+      setAuthenticated(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setAuthBusy(false);
+    }
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    setError("");
+    try {
+      await downloadRecordsCsv();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) setAuthenticated(false);
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const toggle = useCallback((id: number) => {
     setSelected((prev) => {
@@ -58,6 +127,49 @@ export default function AdminPage() {
     }
   }
 
+  if (authenticated === null) {
+    return <div className="min-h-full flex items-center justify-center text-sm text-gray-500">验证登录状态…</div>;
+  }
+
+  if (!authenticated) {
+    return (
+      <div className="min-h-full flex items-center justify-center px-4 py-8">
+        <form onSubmit={handleLogin} className="w-full max-w-sm rounded-2xl bg-white border border-gray-100 shadow-xl px-8 py-8">
+          <h1 className="text-xl font-bold text-gray-800 mb-1">实验员登录</h1>
+          <p className="text-sm text-gray-400 mb-6">登录后可查看、导出和删除测试记录</p>
+          {error && <div className="mb-4 rounded-md border border-red-300 bg-red-50 text-red-700 px-4 py-2 text-sm">{error}</div>}
+          <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="admin-username">用户名</label>
+          <input
+            id="admin-username"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            autoComplete="username"
+            required
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-brand/30"
+          />
+          <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="admin-password">密码</label>
+          <input
+            id="admin-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            required
+            autoFocus
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 mb-6 focus:outline-none focus:ring-2 focus:ring-brand/30"
+          />
+          <button
+            type="submit"
+            disabled={authBusy}
+            className="w-full rounded-lg bg-brand text-white font-semibold py-2.5 hover:bg-indigo-700 disabled:bg-gray-300 transition-colors"
+          >
+            {authBusy ? "登录中…" : "登录"}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-full px-4 py-8">
       <div className="max-w-7xl mx-auto">
@@ -70,12 +182,20 @@ export default function AdminPage() {
             >
               刷新
             </button>
-            <a
-              href={exportCsvUrl()}
+            <button
+              onClick={handleExport}
+              disabled={exporting}
               className="rounded-md bg-brand text-white font-semibold py-2 px-4 hover:bg-indigo-700 transition-colors text-sm"
             >
-              导出 CSV
-            </a>
+              {exporting ? "导出中…" : "导出 CSV"}
+            </button>
+            <button
+              onClick={handleLogout}
+              disabled={authBusy}
+              className="rounded-md border border-gray-300 bg-white py-2 px-4 hover:bg-gray-100 transition-colors text-sm"
+            >
+              退出登录
+            </button>
           </div>
         </div>
 

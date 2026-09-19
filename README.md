@@ -87,10 +87,12 @@ mysql -u root -p < backend/sql/init.sql
 
 ```bash
 cd backend
+# PowerShell: $env:ADMIN_PASSWORD="换成你自己的长随机密码"
+# bash:       export ADMIN_PASSWORD="换成你自己的长随机密码"
 mvn spring-boot:run        # → http://localhost:8080
 ```
 
-可在 `application.yml` 中看到全部可覆盖环境变量：`DB_HOST`、`DB_PORT`、`DB_NAME`、`DB_USERNAME`、`DB_PASSWORD`、`ALLOWED_ORIGINS` 等。
+`ADMIN_PASSWORD` 为必填项，未配置时后端会拒绝启动；管理员用户名默认是 `admin`，可用 `ADMIN_USERNAME` 修改。可在 `application.yml` 中看到全部可覆盖环境变量：`DB_HOST`、`DB_PORT`、`DB_NAME`、`DB_USERNAME`、`DB_PASSWORD`、`ADMIN_USERNAME`、`ADMIN_PASSWORD`、`SESSION_COOKIE_SECURE`、`ALLOWED_ORIGINS` 等。
 
 ### 3. 前端
 
@@ -101,8 +103,8 @@ pnpm dev            # → http://localhost:5173
 ```
 
 - 被试入口：`http://localhost:5173/`
-- 管理页：`http://localhost:5173/?admin=1`
-- 后端地址在 `frontend/.env` 的 `VITE_API_BASE` 配置（默认 `http://localhost:8080`），后端 CORS 已放开。
+- 管理页：`http://localhost:5173/?admin=1`，需使用后端配置的管理员账号登录。
+- 后端地址在 `frontend/.env` 的 `VITE_API_BASE` 配置（默认 `http://localhost:8080`）。Session 请求会携带 Cookie，因此生产环境的 `ALLOWED_ORIGINS` 必须明确设置为前端域名。
 - 构建产物：`pnpm build` → `frontend/dist/`，可直接部署到任意静态托管。
 
 ### 4. 替换实验音频
@@ -115,10 +117,14 @@ pnpm dev            # → http://localhost:5173
 |---|---|---|
 | POST | `/api/participants` | 录入被试信息，返回 `participant_id` |
 | POST | `/api/records` | 提交一条测试结果 `{participant_id, condition, score, duration_ms}` |
-| GET | `/api/records` | 列出全部记录（已 JOIN participant），管理页/排行榜用 |
-| DELETE | `/api/records/{id}` | 删除单条记录 |
-| POST | `/api/records/batch-delete` | 批量删除记录 |
-| GET | `/api/records/export` | 导出全部记录为 CSV |
+| GET | `/api/records/leaderboard` | 公开排行榜，每组最多十条，不返回年龄等被试资料 |
+| POST | `/api/admin/login` | 管理员登录并创建 Session |
+| GET | `/api/admin/session` | 查询登录状态并获取 CSRF token |
+| POST | `/api/admin/logout` | 退出登录（需 Session + CSRF） |
+| GET | `/api/records` | 列出全部记录（需管理员 Session） |
+| DELETE | `/api/records/{id}` | 删除单条记录（需管理员 Session + CSRF） |
+| POST | `/api/records/batch-delete` | 批量删除记录（需管理员 Session + CSRF） |
+| GET | `/api/records/export` | 导出全部记录为 CSV（需管理员 Session） |
 
 CSV 带 UTF-8 BOM，Excel 直接打开不乱码；pandas / SPSS 可直接读取。
 

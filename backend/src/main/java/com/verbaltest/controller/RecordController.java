@@ -3,6 +3,7 @@ package com.verbaltest.controller;
 import com.verbaltest.dto.RecordCreateRequest;
 import com.verbaltest.dto.RecordCreateResponse;
 import com.verbaltest.dto.RecordView;
+import com.verbaltest.dto.LeaderboardEntry;
 import com.verbaltest.service.RecordService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
@@ -42,6 +43,11 @@ public class RecordController {
     @GetMapping
     public List<RecordView> list() {
         return recordService.listAll();
+    }
+
+    @GetMapping("/leaderboard")
+    public List<LeaderboardEntry> leaderboard() {
+        return recordService.leaderboard();
     }
 
     @DeleteMapping("/{id}")

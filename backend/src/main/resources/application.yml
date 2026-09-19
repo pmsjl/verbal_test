@@ -1,6 +1,13 @@
 server:
   address: ${SERVER_ADDRESS:0.0.0.0}
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
 
 spring:
   application:
@@ -24,10 +31,13 @@ mybatis-plus:
       id-type: auto
 
 app:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:}
   cors:
     # 逗号分隔多个 origin，例：https://verbal.example.com,https://www.verbal.example.com
     # 本地开发用 * 放行所有 origin；线上务必收窄
-    allowed-origins: ${ALLOWED_ORIGINS:*}
+    allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:4173}
 
 logging:
   level:
